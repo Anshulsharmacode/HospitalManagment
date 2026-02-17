@@ -480,3 +480,150 @@ This HMS will include:
 
 ---
 
+hospital_management/
+│
+├── manage.py
+│
+├── config/                         # Project Configuration Layer
+│   ├── __init__.py
+│   ├── asgi.py                      # Required for WebSocket
+│   ├── wsgi.py
+│   ├── urls.py                      # Root URL Router
+│   ├── settings/
+│   │   ├── __init__.py
+│   │   ├── base.py                  # Shared settings
+│   │   ├── development.py
+│   │   ├── production.py
+│   │   └── local.py
+│   └── routing.py                   # Channels WebSocket Routing
+│
+├── apps/                            # All Domain Apps
+│
+│   ├── users/                       # Authentication & RBAC
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── permissions.py
+│   │   ├── urls.py
+│   │   ├── signals.py
+│   │   ├── managers.py
+│   │   ├── admin.py
+│   │   └── tests.py
+│
+│   ├── patients/
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── services.py
+│   │   ├── admin.py
+│   │   └── tests.py
+│
+│   ├── appointments/
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── services.py
+│   │   └── tests.py
+│
+│   ├── admissions/                  # Bed + Admission Logic
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── services.py
+│   │   └── signals.py
+│
+│   ├── billing/                     # Charge Master + Invoice Engine
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── services.py              # Billing calculation logic
+│   │   ├── utils.py                 # Tax, discount helpers
+│   │   ├── tasks.py                 # Nightly billing job
+│   │   └── tests.py
+│
+│   ├── laboratory/                  # Lab & Test Workflow
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── services.py
+│   │   └── signals.py
+│
+│   ├── machines/                    # Engineering & Machine Dept
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── services.py
+│   │   └── tests.py
+│
+│   ├── attendance/
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   └── services.py
+│
+│   ├── leave_management/
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   └── services.py
+│
+│   ├── chat/                        # WebSocket Chat Module
+│   │   ├── consumers.py             # Channels consumer
+│   │   ├── routing.py               # Chat routing
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── services.py
+│   │   └── tests.py
+│
+│   ├── notifications/
+│   │   ├── models.py
+│   │   ├── services.py              # SNS/email/WebSocket push
+│   │   ├── tasks.py
+│   │   └── utils.py
+│
+│   ├── analytics/
+│   │   ├── views.py
+│   │   ├── services.py              # Revenue, occupancy logic
+│   │   └── urls.py
+│
+│   └── audit_logs/
+│       ├── models.py
+│       ├── middleware.py
+│       └── services.py
+│
+├── common/                          # Shared utilities
+│   ├── models.py                    # BaseModel (UUID, timestamps)
+│   ├── permissions.py
+│   ├── pagination.py
+│   ├── constants.py
+│   ├── exceptions.py
+│   └── utils.py
+│
+├── static/
+├── media/
+│
+├── templates/                       # If using Django templates
+│
+├── requirements/
+│   ├── base.txt
+│   ├── development.txt
+│   └── production.txt
+│
+├── docker/
+│   ├── Dockerfile
+│   └── docker-compose.yml
+│
+├── scripts/
+│   ├── create_superuser.py
+│   ├── seed_data.py
+│   └── backup_db.sh
+│
+├── .env
+├── .gitignore
+└── README.md
