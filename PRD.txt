@@ -1,0 +1,482 @@
+---
+
+# 📄 PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+# 1. Product Overview
+
+## Product Name
+
+**Cloud-Based Real-Time Hospital Management System (HMS)**
+
+## Objective
+
+To build a **scalable, role-based, real-time hospital ERP system** that manages:
+
+* Patient lifecycle (registration → discharge)
+* Appointment system
+* Admission & bed management
+* Doctor workflow
+* Lab & machine workflow
+* Engineering & maintenance
+* Billing & pricing engine
+* Leave & attendance management
+* Real-time internal communication
+* Analytics & audit logs
+* Secure AWS cloud deployment
+
+---
+
+# 2. System Architecture
+
+## 2.1 High-Level Architecture
+
+Frontend (React / Django Templates)
+→ Django REST API
+→ Django Channels (WebSocket)
+→ PostgreSQL (RDS)
+→ Redis (Channel Layer)
+→ S3 (Media + Invoices)
+→ EC2 (App Hosting)
+
+---
+
+# 3. User Roles & Permission Matrix
+
+## 3.1 Roles
+
+| Role       | Access Level        |
+| ---------- | ------------------- |
+| Admin      | Full system access  |
+| Doctor     | Clinical operations |
+| Technician | Test processing     |
+| Engineer   | Machine maintenance |
+| Reception  | Admission & billing |
+| Patient    | View-only + chat    |
+
+---
+
+## 3.2 Permission Table
+
+| Feature            | Admin | Doctor  | Technician | Engineer | Reception | Patient     |
+| ------------------ | ----- | ------- | ---------- | -------- | --------- | ----------- |
+| Manage Users       | ✅     | ❌       | ❌          | ❌        | ❌         | ❌           |
+| View Appointments  | ✅     | ✅       | ❌          | ❌        | ✅         | ✅           |
+| Add Prescription   | ✅     | ✅       | ❌          | ❌        | ❌         | ❌           |
+| Request Test       | ✅     | ✅       | ❌          | ❌        | ❌         | ❌           |
+| Update Test Status | ✅     | ❌       | ✅          | ❌        | ❌         | ❌           |
+| Assign Bed         | ✅     | ❌       | ❌          | ❌        | ✅         | ❌           |
+| Manage Charges     | ✅     | ❌       | ❌          | ❌        | ❌         | ❌           |
+| Generate Invoice   | ✅     | ❌       | ❌          | ❌        | ✅         | View Only    |
+| Approve Leave      | ✅     | ❌       | ❌          | ❌        | ❌         | ❌           |
+| Chat               | All    | Limited  | Staff       | Staff      | Staff      | Doctor Only  |
+
+---
+
+# 4. Functional Modules
+
+---
+
+# 4.1 Authentication & RBAC
+
+* JWT Authentication
+* Role-Based Access Control
+* Admin hardcoded super access
+* Audit logging for all critical actions
+* 2FA (optional future feature)
+
+---
+
+# 4.2 Patient Lifecycle Management
+
+## Patient States
+
+1. Registered
+2. Appointment Scheduled
+3. Admitted
+4. Under Treatment
+5. Discharged
+6. Archived
+
+---
+
+## Patient Data Model
+
+| Field             | Type      |
+| ----------------- | --------- |
+| Patient ID        | UUID      |
+| Name              | CharField |
+| DOB               | Date      |
+| Blood Group       | Char      |
+| Emergency Contact | Char      |
+| Insurance Details | JSON      |
+| Medical History   | Text      |
+
+---
+
+# 4.3 Appointment System
+
+## Features
+
+* Online booking
+* Slot availability
+* Appointment status tracking
+* Real-time notification to doctor
+* Reschedule & cancellation tracking
+
+---
+
+## Appointment Table
+
+| Field            | Type                              |
+| ---------------- | --------------------------------- |
+| Patient          | FK                                |
+| Doctor           | FK                                |
+| Date             | Date                              |
+| Time Slot        | Time                              |
+| Status           | Scheduled / Completed / Cancelled |
+| Consultation Fee | Decimal                           |
+
+---
+
+# 4.4 Admission & Bed Management
+
+## Bed Status Types
+
+| Status      | Meaning       |
+| ----------- | ------------- |
+| Vacant      | Available     |
+| Occupied    | Assigned      |
+| Cleaning    | Not Ready     |
+| Maintenance | Not Available |
+
+---
+
+## Ward Types
+
+| Ward      | Charge Type |
+| --------- | ----------- |
+| ICU       | Per Day     |
+| General   | Per Day     |
+| Private   | Per Day     |
+| Emergency | Per Hour    |
+
+---
+
+## Admission Table
+
+| Field          | Type                |
+| -------------- | ------------------- |
+| Patient        | FK                  |
+| Bed            | FK                  |
+| Admission Date | DateTime            |
+| Discharge Date | DateTime            |
+| Status         | Active / Discharged |
+
+---
+
+# 4.5 Charge Master (Admin Controlled)
+
+## Charge Category Table
+
+| Category        |
+| --------------- |
+| Ward Charges    |
+| Lab Charges     |
+| Machine Charges |
+| Consultation    |
+| Nursing         |
+| Emergency       |
+| Miscellaneous   |
+
+---
+
+## Charge Item Table
+
+| Field       | Type                       |
+| ----------- | -------------------------- |
+| Name        | Char                       |
+| Category    | FK                         |
+| Price       | Decimal                    |
+| Charge Type | PER_DAY / FIXED / PER_TEST |
+| Active      | Boolean                    |
+
+---
+
+# 4.6 Billing Engine
+
+## Billing Workflow
+
+When:
+
+* Bed assigned → Ward charge added
+* Doctor consultation → Consultation charge added
+* Lab test requested → Lab charge added
+* Machine test requested → Machine charge added
+
+---
+
+## Billing Item Table
+
+| Field       | Type           |
+| ----------- | -------------- |
+| Patient     | FK             |
+| Admission   | FK             |
+| Charge Item | FK             |
+| Quantity    | Decimal        |
+| Unit Price  | Decimal        |
+| Total       | Decimal        |
+| Status      | Pending / Paid |
+
+---
+
+## Invoice Table
+
+| Field        | Type          |
+| ------------ | ------------- |
+| Admission    | FK            |
+| Total Amount | Decimal       |
+| Tax          | Decimal       |
+| Discount     | Decimal       |
+| Final Amount | Decimal       |
+| Status       | Paid / Unpaid |
+
+---
+
+## Real-World Billing Features Added
+
+* Advance payment
+* Partial payment
+* Insurance coverage %
+* GST / tax support
+* Refund handling
+* Credit note generation
+* Payment modes (Cash, UPI, Card, Insurance)
+
+---
+
+# 4.7 Doctor Workflow
+
+* View today's appointments
+* Add prescription
+* Upload medical notes
+* Refer lab test
+* Refer machine test
+* Mark attendance (auto timestamp)
+* View patient history
+
+---
+
+# 4.8 Laboratory / Technician Workflow
+
+* View pending tests
+* Change status:
+
+  * Pending
+  * Sample Collected
+  * In Progress
+  * Completed
+  * Verified
+* Upload report (PDF to S3)
+* Auto-notify doctor
+
+---
+
+# 4.9 Machine & Engineering Module
+
+## Machine Table
+
+| Field         | Type                                           |
+| ------------- | ---------------------------------------------- |
+| Machine Name  | Char                                           |
+| Department    | FK                                             |
+| Status        | Operational / Under Maintenance / Out of Order |
+| Last Serviced | Date                                           |
+
+---
+
+## Engineer Capabilities
+
+* View machine requests
+* Log maintenance
+* Schedule preventive maintenance
+* Track downtime
+* Update status
+
+---
+
+# 4.10 Leave & Attendance System
+
+## Leave Table
+
+| Field      | Type                          |
+| ---------- | ----------------------------- |
+| Employee   | FK                            |
+| Start Date | Date                          |
+| End Date   | Date                          |
+| Reason     | Text                          |
+| Status     | Pending / Approved / Rejected |
+
+---
+
+Attendance:
+
+* Auto mark login time
+* Auto logout time
+* Shift tracking
+* Overtime calculation (future)
+
+---
+
+# 4.11 Real-Time System (WebSocket)
+
+Using:
+
+* Django Channels
+* Redis
+
+## Real-Time Events
+
+| Event              | Receiver            |
+| ------------------ | ------------------- |
+| Appointment booked | Doctor              |
+| Test completed     | Doctor              |
+| Leave approved     | Staff               |
+| Bed assigned       | Reception dashboard |
+| Billing updated    | Reception           |
+| Chat message       | Allowed users       |
+
+---
+
+# 4.12 Chat System
+
+## Rules
+
+* Patient ↔ Assigned Doctor ONLY
+* Staff ↔ Staff (All roles except patient)
+* Messages stored in DB
+* Typing indicator
+* Read receipt
+* Online/offline tracking
+
+---
+
+# 4.13 Audit Logging
+
+Track:
+
+* Billing edits
+* Price changes
+* Discharge processing
+* Leave approval
+* Machine status changes
+
+---
+
+# 4.14 Analytics Dashboard
+
+Admin Dashboard Metrics:
+
+| Metric                 | Description         |
+| ---------------------- | ------------------- |
+| Daily Revenue          | Total billing       |
+| ICU Occupancy %        | Beds used           |
+| Average Length of Stay | Admission analytics |
+| Pending Payments       | Financial overview  |
+| Machine Downtime       | Maintenance KPI     |
+| Test Turnaround Time   | Lab efficiency      |
+
+---
+
+# 4.15 Security Requirements
+
+* HTTPS only
+* Encrypted DB connection
+* Private S3 buckets
+* Signed URLs for reports
+* Role validation at API level
+* Rate limiting
+* Audit logs immutable
+
+---
+
+# 5. Non-Functional Requirements
+
+| Parameter         | Target   |
+| ----------------- | -------- |
+| API Response Time | < 2 sec  |
+| WebSocket Latency | < 500 ms |
+| Concurrent Users  | 200      |
+| Uptime            | 99%      |
+| Backup Frequency  | Daily    |
+
+---
+
+# 6. AWS Free Tier Deployment Plan
+
+| Component  | AWS Service    |
+| ---------- | -------------- |
+| App Server | EC2 t2.micro   |
+| Database   | RDS PostgreSQL |
+| Media      | S3             |
+| Cache      | Redis          |
+| Monitoring | CloudWatch     |
+| Scheduler  | EventBridge    |
+
+---
+
+# 7. Development Phases
+
+### Phase 1
+
+Auth + Roles + Appointment
+
+### Phase 2
+
+Admission + Bed + Charge Master
+
+### Phase 3
+
+Doctor + Lab + Machine Workflow
+
+### Phase 4
+
+Billing Engine + Invoice
+
+### Phase 5
+
+Chat + Real-Time
+
+### Phase 6
+
+Analytics + Optimization
+
+---
+
+# 8. Future Enterprise Enhancements
+
+* Pharmacy management
+* Inventory management
+* HR payroll
+* Multi-branch hospital
+* EMR standard compliance (HL7/FHIR)
+* Mobile app
+* AI-based bed prediction
+* SMS reminders
+* Online payment gateway
+
+---
+
+# 9. Final System Summary
+
+This HMS will include:
+
+* Complete patient lifecycle
+* Real-time hospital operations
+* Automated billing engine
+* Role-based security
+* AWS cloud architecture
+* Production-grade audit system
+* Real-world hospital features
+
+---
+
