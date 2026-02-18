@@ -5,10 +5,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 from common.decorator.admin import admin_required
-from common.api.api import error_response, success_response
-
+from common.api.api import check_req, check_user_auth, error_response, success_response
+from django.views.decorators.http import require_POST
 from .models import AuthToken, User, UserRole
-
+from django.contrib.auth.decorators import login_required
 
 def _parse_json(request):
     try:
@@ -17,11 +17,10 @@ def _parse_json(request):
         return None
 
 
-
+@require_POST
 def signup_view(request):
-    if request.method != "POST":
-        return error_response(message="Method not allowed", status=405)
 
+    
     payload = _parse_json(request)
     if payload is None:
         return error_response(message="Invalid JSON payload", status=400)
@@ -61,7 +60,7 @@ def signup_view(request):
     )
 
 
-
+@require_POST
 def signin_view(request):
     if request.method != "POST":
         return error_response(message="Method not allowed", status=405)
@@ -97,9 +96,9 @@ def signin_view(request):
 
 
 @admin_required
+@require_POST
+@login_required
 def create_staff(request):
-    if request.method != 'POST':
-        return error_response(message="Method not allowed", status=405)
 
     payload = _parse_json(request)
     if payload is None:
