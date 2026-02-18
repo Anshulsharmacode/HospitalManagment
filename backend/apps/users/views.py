@@ -3,7 +3,8 @@ import json
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 
-from backend.common.decorator.admin import admin_required
+
+from common.decorator.admin import admin_required
 from common.api.api import error_response, success_response
 
 from .models import AuthToken, User, UserRole
@@ -139,3 +140,6 @@ def create_staff(request):
         message="Staff created successfully",
         status=201,
     )
+
+
+    

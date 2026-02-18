@@ -1,5 +1,5 @@
 from functools import wraps
-from backend.apps.users.models import UserRole
+from apps.users.models import UserRole
 from common.api.api import error_response, success_response
 
 

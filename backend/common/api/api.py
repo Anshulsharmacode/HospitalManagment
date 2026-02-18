@@ -19,3 +19,14 @@ def error_response(message="Something went wrong", status=400, errors=None):
     if errors is not None:
         payload["errors"] = errors
     return JsonResponse(payload, status=status)
+
+
+def check_req(request , type):
+    if request.method != type:
+        return error_response(message="Method not allowed", status=405)
+    return None
+
+def check_user_auth(request):
+    if not request.user.is_authenticated:
+        return error_response("Authentication required", status=401)
+    return None
